@@ -1,6 +1,7 @@
 import requests
 import string
 import pymongo
+import datetime
 
 try:
     myclient = pymongo.MongoClient("mongodb://localhost:27017/")
@@ -10,8 +11,10 @@ except:
 
 
 
-mydb = myclient["mydatabase"]
-mycol = mydb["customers"]
+mydb = myclient["pracujPL"]
+mycol = mydb["jobtitles"]
+
+coll = myclient["local"]["test2"]
 
 jobtitles_set = set()
 alphabet_string = string.ascii_uppercase
@@ -36,11 +39,24 @@ for letter in alphabet_list:
     response = requests.request("GET", url, headers=headers, data=payload)
 
     jobTitles =  response.json()['jobTitles']
+    
+    # print(jobTitles)
+    # for title in jobTitles:
+    #     jobtitles_set.add(title['name'])
 
-    for title in jobTitles:
-        jobtitles_set.add(title['name'])
+    final_list = []
+    for key in jobTitles:
+            if len(list(mycol.find({'name': key['name']}))) > 0:
+                mycol.update_one(filter = {'name': key['name']},replacement={"date_updated": datetime.datetime.now()}, upsert=True)
+            else:
+                each_jobTitle = {
+                    "external_id": key['id'],
+                    "name": key['name'],
+                    "date_created":datetime.datetime.now(),
+                    "date_updated":datetime.datetime.now()
+                }
+                print({"name": each_jobTitle['name']})
+                x = mycol.replace_one(filter = {"name": each_jobTitle['name']},replacement=each_jobTitle, upsert=True)
 
-final_dictionary = dict.fromkeys(jobtitles_set, 0)
-x = mycol.insert_one(final_dictionary)
-print(jobtitles_set)
+
 
