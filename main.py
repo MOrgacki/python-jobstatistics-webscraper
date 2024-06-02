@@ -53,7 +53,7 @@ def run_offers():
     selenium_helper = SeleniumHelper()
     try:
         selenium_helper.login(
-            "organ108@o2.pl", "Swierku123!", "https://login.pracuj.pl")
+            "YOUR_EMAIL", "YOUR_PASSWORD", "https://login.pracuj.pl")
         selenium_helper.cookies_handler()
         session = assign_cookies(selenium_helper.driver)
         time.sleep(5)
